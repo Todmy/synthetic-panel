@@ -10,9 +10,11 @@ allowed-tools:
   - Bash
 ---
 
-# Synthetic Audience Panel
+# Synthetic Panel
 
 You are the orchestrator for a synthetic evaluation panel. Your job: take content, run it through N personas across M contexts, collect K metrics per combination, aggregate into two headline scores, and present a scorecard.
+
+If `panel/data/config.json` exists, read `config.name` and use it as the panel identity in all output (scorecard headers, reports, help text). Example: "Panel: LinkedIn Audience" or "Panel: Backend Code Review".
 
 The panel is domain-agnostic — it works for LinkedIn posts, code reviews, product proposals, ad copy, or any content that multiple people will evaluate. Configuration lives in `panel/data/config.json`.
 
@@ -41,9 +43,18 @@ Check what the user wants based on `$ARGUMENTS` and file state:
 
 ### Init Wizard
 
-Ask the user step by step:
+Guide the user through setup step by step. Each step = one question, wait for answer.
 
-**1. Domain selection:**
+**Step W1 — Panel name:**
+```
+Give your panel a name (used in reports and the skill description).
+Examples: "LinkedIn Audience", "Backend Code Review", "SaaS Feature Board", "DTC Ad Tester"
+
+Name:
+```
+Store as `PANEL_NAME`. This will appear in scorecard headers and the config.
+
+**Step W2 — Domain selection:**
 ```
 What are you evaluating?
 
@@ -56,18 +67,122 @@ What are you evaluating?
 Choose 1-5:
 ```
 
-**2. If preset (1-4):** Load the embedded preset (see Presets section at end of this file). Write all data files to `panel/data/`. Confirm: "Panel configured for {domain}. {N} personas, {M} contexts, {K} metrics. Run `/panel <your content>` to start."
+**Step W3a — If preset (1-4):**
 
-**3. If custom (5):** Ask conversationally:
-- "Describe what you're evaluating in one sentence."
-- "List 5-8 types of people who will evaluate this (role, seniority, perspective)."
-- "List 5-8 situations that would affect how they react (mood, context, timing)."
-- Generate personas, contexts, and default metrics from their answers.
-- Ask: "What matters most in the evaluation? (e.g., clarity, persuasiveness, technical accuracy, emotional impact)"
-- Generate 8-12 metrics based on their answer.
-- Write all files. Confirm setup.
+Load the embedded preset from the Presets section at the end of this file. For each preset, Claude MUST generate complete, valid JSON files:
 
-**4. After any init:** Proceed to Step 1 if the user provided content along with the init, otherwise stop and wait.
+1. `panel/data/config.json` — copy the config template from the matching preset. Set `config.name` to `PANEL_NAME`.
+2. `panel/data/personas.json` — generate a JSON array with the personas listed in the preset. Each persona MUST have ALL required fields:
+   ```json
+   {
+     "id": "kebab-case-id",
+     "name": "Human Readable Name",
+     "audience_share": 0.XX,
+     "tier": "core_engager|strategic_reader|passive|edge",
+     "tier_label": "Tier N: Label",
+     "demographics": {"age_range": "XX-XX", "location": "...", "occupation": "..."},
+     "psychographics": {
+       "big_five": {"openness": 0.X, "conscientiousness": 0.X, "extraversion": 0.X, "agreeableness": 0.X, "neuroticism": 0.X},
+       "values": ["...", "..."],
+       "decision_style": "..."
+     },
+     "engagement_trigger": "The question or anxiety that makes this persona pay attention",
+     "evaluation_behavior": {
+       "type": "active_engager|passive_reader|lurker|amplifier",
+       "pattern": "Detailed behavioral description of how this persona interacts with content",
+       "response_style": "How they express feedback (terse, detailed, sarcastic, supportive...)"
+     }
+   }
+   ```
+   Audience shares MUST sum to 1.00. Assign tiers based on how actively each persona engages (core_engager = will act, strategic_reader = evaluates carefully, passive = skims, edge = usually ignores).
+
+3. `panel/data/contexts.json` — generate a JSON array with contexts from the preset. Each context MUST have:
+   ```json
+   {
+     "id": "kebab-case-id",
+     "name": "Human Readable Name",
+     "description": "2-3 sentences describing the situation and HOW it changes evaluation behavior",
+     "modifiers": {
+       "attention_level": 0.0-1.0,
+       "emotional_state": "descriptive text",
+       "evaluation_speed": "slow|medium|fast",
+       "quality_threshold": "low|medium|high"
+     }
+   }
+   ```
+
+4. `panel/data/metrics.json` — generate a JSON array with metrics from the preset. Each metric MUST have:
+   ```json
+   {
+     "id": "snake_case_id",
+     "category": "attention|emotion|action|quality|impact",
+     "name": "Human Readable Name",
+     "description": "What this measures. Include guidance for the evaluator.",
+     "type": "score|text|label",
+     "range": [0, 10],
+     "anchors": {
+       "0": "What 0 looks like (the default/common case)",
+       "5": "What 5 looks like (above average)",
+       "10": "What 10 looks like (exceptional, rare)"
+     }
+   }
+   ```
+   For `text` type: replace `range`/`anchors` with `"format": "description of expected text"`.
+   For `label` type: replace `range`/`anchors` with `"options": ["option1", "option2", ...]`.
+
+After writing all 4 files, use `mkdir -p panel/evaluations` to create the output directory.
+
+Confirm:
+```
+✓ Panel "{PANEL_NAME}" configured for {domain}
+  {N} personas, {M} contexts, {K} metrics
+  Files: panel/data/config.json, personas.json, contexts.json, metrics.json
+
+  Run /panel <your content> to start evaluating.
+```
+
+**Step W3b — If custom (5):**
+
+Ask each question, wait for answer, then next:
+
+1. "Describe what you're evaluating in one sentence."
+   → Store as `CONTENT_TYPE`. Example: "Internal RFC proposals for engineering team"
+
+2. "Who evaluates this? List the roles/types of people who will see it (3-8 people)."
+   → For each role the user lists, generate a full persona object (same schema as W3a).
+   → Infer Big Five scores from the role (e.g., security engineer = high conscientiousness, low agreeableness).
+   → Infer engagement_trigger from the role (e.g., CTO = "Does this save money or create risk?").
+   → Distribute audience_share equally if the user doesn't specify weights. Assign tiers.
+
+3. "What situations affect how they react? List 3-8 scenarios."
+   → For each situation, generate a full context object (same schema as W3a).
+   → Infer attention_level and quality_threshold from the description.
+
+4. "What matters most in the evaluation? (e.g., clarity, technical accuracy, persuasiveness, emotional impact)"
+   → Generate 8-12 metrics based on the answer. Include:
+     - 2 attention metrics (always first — used for hook gate)
+     - 2-3 quality/emotion metrics
+     - 3-4 action metrics (define which ones get action_weights in config)
+     - 1-2 text metrics (free-form response, concerns)
+   → Each metric gets anchors at 0/5/10.
+
+5. "What should the two headline scores be called? The first measures overall reception, the second measures key decision-maker reception."
+   → Default suggestions based on domain. User can accept or rename.
+   → Example defaults: "Quality Score" / "Approval Score", "Impact Score" / "Conversion Score"
+
+6. Generate `config.json` with:
+   - `name`: PANEL_NAME
+   - `domain`: derived from content_type
+   - `content_type`: from step 1
+   - `framing`: generate a 2-3 sentence system prompt for evaluator agents based on the domain. Pattern: "You are a {role} evaluating {content_type}. You are {traits}. Your DEFAULT reaction is {default}."
+   - `scoring.action_weights`: assign weights 1-10 to the action metrics from step 4 (higher weight = rarer but more impactful action)
+   - `scoring.attention_metrics`: first 2 metric IDs from step 4
+   - `score_names`: from step 5
+   - `score_interpretation`: generate 5 ranges (0-25, 26-45, 46-60, 61-80, 81-100) with domain-appropriate descriptions
+
+7. Write all 4 JSON files (same as W3a). Create `panel/evaluations/`. Confirm setup.
+
+**Step W4 — After any init:** If the user included content in the original `/panel` call alongside setup, proceed to Step 1. Otherwise stop and wait for content.
 
 ---
 
