@@ -58,7 +58,7 @@ What are you evaluating?
 
 ### W3. Generate Data
 
-**If preset (1-4):** Read `panel-engine.md` → Presets section for the selected domain. Generate all 4 JSON files to `panel/data/` with full schemas. Create `panel/evaluations/` directory.
+**If preset (1-4):** Read [engine.md](engine.md) → Presets section for the selected domain. Generate all 4 JSON files to `panel/data/` with full schemas. Create `panel/evaluations/` directory.
 
 **If custom (5):** Ask conversationally:
 1. "Describe what you're evaluating in one sentence." → `content_type`
@@ -69,7 +69,7 @@ What are you evaluating?
 
 Generate `config.json` with: name, domain, content_type, framing (2-3 sentence evaluator prompt), action_weights (metric→impact mapping), attention_metrics (first 2 metrics), score_names, score_interpretation (5 ranges).
 
-All JSON schemas and generation rules are in `panel-engine.md` → Init Wizard Data Schemas section.
+All JSON schemas and generation rules are in [engine.md](engine.md) → Init Wizard Data Schemas section.
 
 ### W4. Confirm
 
@@ -86,7 +86,7 @@ If user included content in the original call, proceed to evaluation.
 
 ## Evaluation Engine
 
-When routing decides to evaluate content, read `panel-engine.md` from this skill's directory and follow Steps 1-7:
+When routing decides to evaluate content, read [engine.md](engine.md) for the complete evaluation pipeline (Steps 1-7):
 
 1. **Parse Input** — detect file path vs raw text, validate length
 2. **Load Data** — read config + 4 JSON files, display preflight
