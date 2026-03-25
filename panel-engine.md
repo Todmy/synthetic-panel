@@ -315,17 +315,17 @@ Proceed to Step 3.
                { persona_id, context_id, reasoning, metrics: { all 20 metric values } }
 
      CRITICAL PROMPT ELEMENTS:
-       - System identity: "You are evaluating a LinkedIn post draft from the perspective
+       - System identity: "You are evaluating content from the perspective
          of {N} audience personas."
        - Skeptical framing: "You are a busy, skeptical professional. Your default is to
-         scroll past. Most LinkedIn content is noise. A 5/10 means average, not bad."
+         scroll past. Most content is noise. A 5/10 means average, not bad."
        - Chain-of-thought: "Before scoring, explain in one sentence WHY this persona
          would react this way in this context."
        - Distribution forcing: "Average scores across all contexts should be 4-5/10.
          Only 10-15% of scores should exceed 7."
        - Output format: JSON array with exact field names matching metrics-schema IDs
        - Include full persona objects (demographics, psychographics, engagement triggers,
-         LinkedIn behavior) — not just names
+         evaluation_behavior) — not just names
        - Include full context objects (modifiers, attention levels) — not just names
        - Include metric anchors so the agent knows what each score level means
        - For text metrics (attention_loss_point, simulated_comment, comment_type,
@@ -391,7 +391,7 @@ The difference: 2/10 hooks are templates anyone could write. 8/10 hooks contain 
 
 === PERSONAS ===
 
-Read each profile carefully — demographics, psychographics, LinkedIn behavior, and especially the engagement_trigger field.
+Read each profile carefully — demographics, psychographics, evaluation_behavior, and especially the engagement_trigger field.
 
 The engagement_trigger is the anxiety or question that makes this persona stop scrolling. For EVERY evaluation, explicitly check: does this post HIT this persona's engagement_trigger? Not "vaguely related" — does it poke the nerve? If not, default scores are 0-3.
 
@@ -505,7 +505,7 @@ Produce all {N_TOTAL} objects. Do not skip any persona-context pair. Do not abbr
 For each of the 5 agents, create a concrete prompt by replacing placeholders in `AGENT_PROMPT_TEMPLATE`:
 
 - `{DRAFT_TEXT}` -> full `DRAFT_TEXT` from Step 1
-- `{PERSONA_BATCH_JSON}` -> JSON array of 4 persona objects for this agent (all fields: id, name, tier, audience_share, demographics, psychographics, engagement_trigger, linkedin_behavior)
+- `{PERSONA_BATCH_JSON}` -> JSON array of 4 persona objects for this agent (all fields: id, name, tier, audience_share, demographics, psychographics, engagement_trigger, evaluation_behavior)
 - `{CONTEXTS_JSON}` -> full CONTEXTS array (same for every agent)
 - `{METRICS_SCHEMA_JSON}` -> full METRICS_SCHEMA array (same for every agent; includes id, name, description, type, range/options/format, anchors)
 - `{N_PERSONAS}` -> `4`
@@ -712,7 +712,7 @@ Pool all valid cells. For each category, average its numeric metrics:
 
 Generate one-line interpretation per category. Key thresholds:
 - **Attention**: 0-2 feed noise, 2-4 some pause, 4-6 good capture, 6+ exceptional.
-- **Action**: 0-2 normal LinkedIn rates, 2-4 above average, 4+ unusual.
+- **Action**: 0-2 typical engagement rates, 2-4 above average, 4+ unusual.
 - **Virality**: 0-1 dies on platform, 1-3 some dark-social, 3+ breaks out.
 - **Brand Effect**: 0-1 no impact, 1-3 some brand building, 3+ strong.
 
@@ -898,11 +898,11 @@ After the evaluation is complete and the summary is displayed, you enter convers
 | **Persona management** | "Add a persona: ...", "Remove persona ...", "Change persona ..." | Edit `panel/data/personas.json` — add/modify/delete persona. Recalculate audience_shares so they sum to 1.00. Warn: "Editing personas invalidates existing calibration data." Confirm the change. |
 | **Context management** | "Add context: ...", "Remove context: ...", "Change context ..." | Edit `panel/data/contexts.json` — add/modify/delete context. Validate required fields present. Confirm the change. |
 | **History** | "Show history", "previous evaluations", "past scores" | Handle per **7f. Evaluation History** below. |
-| **Anything else** | No pattern match above | Respond naturally using the evaluation data and your knowledge of LinkedIn content strategy. If the intent is ambiguous, ask which action the user wants. |
+| **Anything else** | No pattern match above | Respond naturally using the evaluation data and your knowledge of the evaluation domain. If the intent is ambiguous, ask which action the user wants. |
 
 ### 7a. Calibration Input
 
-<!-- T012: Parse real LinkedIn metrics, match/create calibration record, compute weighted_score, write calibration.json.
+<!-- T012: Parse real performance metrics, match/create calibration record, compute weighted_score, write calibration.json.
      Formulas: weighted_score = reactions*1 + comments*3 + saves*2 + reposts*5 (null fields excluded, not 0).
      engagement_rate = sum(non-null action fields) / impressions (null if impressions is null or no action fields). -->
 
@@ -1040,7 +1040,7 @@ Read `panel/data/personas.json`. Display a summary table sorted by `audience_sha
 ```
 Name                          Share   Tier              Behavior
 ──────────────────────────────────────────────────────────────────
-{name (30ch)}                 {share} {tier_label}      {linkedin_behavior.type}
+{name (30ch)}                 {share} {tier_label}      {evaluation_behavior.type}
 ...
 Total share: {sum}
 ```
@@ -1051,7 +1051,7 @@ When the user asks to **add, edit, or delete a persona**:
 
 1. Read `panel/data/personas.json` into memory.
 2. Apply the requested change:
-   - **Add**: construct a full persona object with all required fields (`id`, `name`, `audience_share`, `tier`, `tier_label`, `demographics` with `age_range`/`location`/`education`/`occupation`/`experience_years`/`family`, `psychographics` with `big_five` (all five traits)/`values`/`tech_adoption`/`decision_style`, `engagement_trigger`, `linkedin_behavior` with `type`/`pattern`/`scroll_speed`/`comment_style`). Ask the user for any fields they didn't specify.
+   - **Add**: construct a full persona object with all required fields (`id`, `name`, `audience_share`, `tier`, `tier_label`, `demographics` with `age_range`/`location`/`education`/`occupation`/`experience_years`/`family`, `psychographics` with `big_five` (all five traits)/`values`/`tech_adoption`/`decision_style`, `engagement_trigger`, `evaluation_behavior` with `type`/`pattern`/`scroll_speed`/`comment_style`). Ask the user for any fields they didn't specify.
    - **Edit**: locate persona by `id` or `name` (fuzzy match OK), update specified fields.
    - **Delete**: locate persona by `id` or `name`, remove from array.
 3. **Validate** the resulting array:
@@ -1059,7 +1059,7 @@ When the user asks to **add, edit, or delete a persona**:
    - All required fields present and non-null (except `demographics.family` which may be null).
    - Sum of `audience_share` across all personas = 1.00 ± 0.01. If outside this range, warn and suggest which personas' shares to adjust to restore balance.
    - `tier` is one of: `core_engager`, `strategic_reader`, `passive`, `edge`.
-   - `linkedin_behavior.type` is one of: `commenter`, `liker`, `lurker`, `sharer`.
+   - `evaluation_behavior.type` is one of: `commenter`, `liker`, `lurker`, `sharer`.
 4. Print warning: **"Modifying personas invalidates existing calibration. Recalibration recommended after changes."**
 5. Write the validated array back to `panel/data/personas.json` (pretty-printed, 2-space indent).
 6. Confirm: state what changed, show new persona count and audience_share sum.
