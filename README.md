@@ -23,7 +23,7 @@ The skill appears as `/synthetic-panel` in Claude Code.
 ## First Run
 
 ```
-/panel
+/synthetic-panel
 ```
 
 The skill detects missing data and starts an interactive setup:
@@ -47,7 +47,7 @@ Pick a preset or describe your domain. The wizard generates personas, contexts, 
 Test social media posts, newsletter drafts, or blog articles before publishing. The panel simulates your actual audience segments — who stops scrolling, who comments, who shares, who ignores.
 
 ```
-/panel "Full-stack developer goes outdated. Now, there's something new..."
+/synthetic-panel "Full-stack developer goes outdated. Now, there's something new..."
 
 Reach Score: 67/100 | Buyer Score: 86/100
 
@@ -63,7 +63,7 @@ RISKS:
 Simulate how your team would review a PR. Different reviewers catch different things — a security engineer spots vulnerabilities, a junior dev flags readability, an architect questions design choices.
 
 ```
-/panel "PR: Refactor auth middleware to support OAuth2 + SAML..."
+/synthetic-panel "PR: Refactor auth middleware to support OAuth2 + SAML..."
 
 Quality Score: 58/100 | Risk Score: 72/100
 
@@ -80,7 +80,7 @@ RISKS:
 Before pitching a feature to stakeholders, test how different roles react. CTOs care about feasibility, PMs about roadmap fit, sales about deal enablement, support about ticket reduction.
 
 ```
-/panel "Proposal: AI-powered search that learns from user behavior..."
+/synthetic-panel "Proposal: AI-powered search that learns from user behavior..."
 
 Approval Score: 45/100 | Priority Score: 38/100
 
@@ -97,7 +97,7 @@ RISKS:
 Test headlines, email subject lines, landing page copy, or ad variations across customer segments. Find out which message resonates before spending ad budget.
 
 ```
-/panel "Stop losing deals to competitors who demo better than you."
+/synthetic-panel "Stop losing deals to competitors who demo better than you."
 
 Impact Score: 52/100 | Conversion Score: 61/100
 
@@ -173,7 +173,7 @@ Everything is conversational. No separate commands needed:
 ## Reconfigure Anytime
 
 ```
-/panel setup
+/synthetic-panel setup
 ```
 
 Switch presets, add personas, change metrics, adjust weights.
