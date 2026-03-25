@@ -14,7 +14,7 @@ allowed-tools:
 
 Evaluate content through a synthetic audience: **personas × contexts × metrics** → parallel agents → scored report.
 
-Works for any domain: LinkedIn posts, code reviews, feature proposals, ad copy, presentations, job descriptions — anything multiple people will judge.
+Works for any domain: social media posts, code reviews, feature proposals, ad copy, presentations, job descriptions — anything multiple people will judge.
 
 If `panel/data/config.json` exists, read `config.name` and use it as the panel identity in all output.
 
@@ -39,7 +39,7 @@ Run this when panel data doesn't exist or user requests setup. Ask one question 
 
 ```
 Give your panel a name (appears in reports).
-Examples: "LinkedIn Audience", "Backend Code Review", "SaaS Feature Board"
+Examples: "Social Media Audience", "Backend Code Review", "SaaS Feature Board"
 
 Name:
 ```
@@ -49,7 +49,7 @@ Name:
 ```
 What are you evaluating?
 
-  1. LinkedIn / social media posts
+  1. Social media posts (LinkedIn, Twitter/X, newsletters)
   2. Code (PRs, architecture decisions)
   3. Product features / proposals
   4. Marketing copy (ads, emails, landing pages)

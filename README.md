@@ -25,7 +25,7 @@ The skill detects missing data and starts an interactive setup:
 ```
 What are you evaluating?
 
-  1. LinkedIn / social media posts
+  1. Social media posts (LinkedIn, Twitter/X, newsletters)
   2. Code (PRs, architecture decisions)
   3. Product features / proposals
   4. Marketing copy (ads, emails, landing pages)
@@ -38,7 +38,7 @@ Pick a preset or describe your domain. The wizard generates personas, contexts, 
 
 ### Content & Social Media
 
-Test LinkedIn posts, Twitter threads, newsletter drafts, or blog articles before publishing. The panel simulates your actual audience segments — who stops scrolling, who comments, who shares, who ignores.
+Test social media posts, newsletter drafts, or blog articles before publishing. The panel simulates your actual audience segments — who stops scrolling, who comments, who shares, who ignores.
 
 ```
 /panel "Full-stack developer goes outdated. Now, there's something new..."
@@ -128,7 +128,7 @@ If multiple people will judge your work, the panel can simulate them first. Defi
 action_value = Σ(metric × weight)
 ```
 
-For LinkedIn: a comment (×5) drives more reach than a like (×1). For code review: requesting changes (×8) is a stronger signal than approving (×1). You define the weights.
+For social media: a comment (×5) drives more reach than a like (×1). For code review: requesting changes (×8) is a stronger signal than approving (×1). You define the weights.
 
 **3. Hook Gate** — Evaluators can't engage with content they didn't read. If attention metrics score below threshold, action scores are proportionally suppressed:
 
@@ -148,7 +148,7 @@ score = k × ln(1 + predicted_reach)
 "This post got 45K views, 89 reactions, 23 comments"
 ```
 
-Tested on 12 LinkedIn posts: **Spearman rank correlation 0.951** (11 of 12 posts ranked within ±1 of real performance).
+Tested on 12 social media posts: **Spearman rank correlation 0.951** (11 of 12 posts ranked within ±1 of real performance).
 
 ## After Evaluation
 

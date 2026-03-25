@@ -656,7 +656,7 @@ Weights reflect real platform mechanics: one comment drives more distribution th
 
 **Step 2: Hook gate** — if the persona doesn't stop scrolling, actions can't happen:
 ```
-hook_quality = mean(CONFIG.scoring.attention_metrics)  # e.g., mean(hook_stop, read_through) for LinkedIn
+hook_quality = mean(CONFIG.scoring.attention_metrics)  # e.g., mean(hook_stop, read_through) for social media
 hook_gate = min(1.0, hook_quality / CONFIG.scoring.hook_gate_threshold)
 gated_action = action_value × hook_gate
 ```
@@ -1150,15 +1150,15 @@ Return to conversational mode (Step 7 loop).
 
 When the init wizard selects a preset, generate data files from these templates.
 
-### Preset 1: LinkedIn Content
+### Preset 1: Social Media Content
 
-**config.json**: domain: "LinkedIn Content", content_type: "LinkedIn post draft", framing: "You are a LinkedIn feed simulator. You simulate real humans scrolling LinkedIn — distracted, skeptical, self-interested. Default is scroll past.", action_weights: {like_probability: 1, comment_probability: 5, repost_probability: 10, save_probability: 2}, attention_metrics: ["hook_stop", "read_through"], hook_gate_threshold: 4, scores: "Reach Score" / "Buyer Score" (buyer_tiers: ["core_engager", "strategic_reader"]).
+**config.json**: domain: "Social Media Content", content_type: "Social media post draft", framing: "You are a social media feed simulator. You simulate real humans scrolling their feed — distracted, skeptical, self-interested. Default is scroll past.", action_weights: {like_probability: 1, comment_probability: 5, repost_probability: 10, save_probability: 2}, attention_metrics: ["hook_stop", "read_through"], hook_gate_threshold: 4, scores: "Reach Score" / "Buyer Score" (buyer_tiers: ["core_engager", "strategic_reader"]).
 
-**personas**: Generate 10-20 LinkedIn audience personas (Senior Dev, Tech Lead, CTO, Recruiter, Indie Hacker, Junior Dev, Mid-Level Dev, PM, Freelance Dev, Content Creator, HR Manager, Enterprise Architect). Each with audience_share (sum to 1.0), tier, demographics, psychographics (Big Five), engagement_trigger, behavior pattern.
+**personas**: Generate 10-20 social media audience personas (Senior Dev, Tech Lead, CTO, Recruiter, Indie Hacker, Junior Dev, Mid-Level Dev, PM, Freelance Dev, Content Creator, HR Manager, Enterprise Architect). Each with audience_share (sum to 1.0), tier, demographics, psychographics (Big Five), engagement_trigger, behavior pattern.
 
 **contexts**: Generate 10-20 situational contexts (Monday morning, Friday evening, after AI release, layoffs wave, conference week, job hunting, burnout, quiet week, new year planning, feed oversaturated, post-viral fatigue, after AI scandal).
 
-**metrics**: Generate 15-20 LinkedIn engagement metrics with anchors at 0/5/10 (hook_stop, read_through, attention_loss_point, primary_emotion, emotion_strength, ego_engagement, like/comment/repost/save/profile_click/follow probability, simulated_comment, comment_type, author_perception, screenshot_send, remember_tomorrow, purchase_intent).
+**metrics**: Generate 15-20 social media engagement metrics with anchors at 0/5/10 (hook_stop, read_through, attention_loss_point, primary_emotion, emotion_strength, ego_engagement, like/comment/repost/save/profile_click/follow probability, simulated_comment, comment_type, author_perception, screenshot_send, remember_tomorrow, purchase_intent).
 
 ### Preset 2: Code Review
 
